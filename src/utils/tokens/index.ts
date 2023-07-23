@@ -1,0 +1,12 @@
+export const POSTGRES_TOKEN = Symbol("POSTGRES_TOKEN"); 
+export const PINO_TOKEN = Symbol("PINO_TOKEN"); 
+
+export const PRODUCTS_REPOSITORY = Symbol("PRODUCTS_REPOSITORY");
+export const USERS_REPOSITORY = Symbol("USERS_REPOSITORY");
+
+export const EXPRESS_SERVER_TOKEN = Symbol("EXPRESS_SERVER_TOKEN");
+
+export const USERS_SERVICE_TOKEN = Symbol("USERS_SERVICE_TOKEN");
+export const PRODUCTS_SERVICE_TOKEN = Symbol("PRODUCTS_SERVICE_TOKEN");
+
+export const PG_CONNECTION = Symbol("PG_CONNECTION");
