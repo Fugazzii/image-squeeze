@@ -1,6 +1,6 @@
 export interface UserInterface {
     email: string;
-    password: string;
+    pwd: string;
     username: string;
     balance: number;
 }
@@ -13,11 +13,11 @@ export interface UserInterfaceForClient {
 
 export interface UserLoginInterface {
     email: string;
-    password: string;
+    pwd: string;
 }
 
 export interface UserRegisterInterface {
     email: string;
-    password: string;
+    pwd: string;
     username: string;
 }

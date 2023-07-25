@@ -2,6 +2,8 @@ import express, { Application, NextFunction, Request, Response, Router } from "e
 import { Server } from "@src/interfaces";
 import { injectable } from "inversify";
 
+import cors from "cors";
+
 @injectable()
 export class ExpressServer implements Server {
     private readonly server: Application;
@@ -11,6 +13,7 @@ export class ExpressServer implements Server {
         this.server = express();
         this.router = express.Router();
         this.server.use(express.json());
+    	this.server.use(cors());
         this.server.use(this.router);
     }
 

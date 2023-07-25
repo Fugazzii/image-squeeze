@@ -1,4 +1,4 @@
-import { Logger, PostgresRepository } from "@src/interfaces/";
+import { Logger, PostgresRepository, UserRegisterInterface } from "@src/interfaces/";
 import { PG_CONNECTION, PINO_TOKEN } from "@src/utils/tokens";
 import { injectable, inject } from "inversify";
 import pg from "pg";
@@ -14,10 +14,10 @@ export class UsersRepository implements PostgresRepository {
 
     /* Procedures */
 
-    public async insert(username: string, email: string, password: string): Promise<any> {
+    public async insert({ username, email, pwd }: UserRegisterInterface): Promise<any> {
         this.logger.warn("Password need to be hashed");
         try {
-            const query = `CALL register_new_user('${username}', '${email}', '${password}', 0);`;
+            const query = `CALL register_new_user('${username}', '${email}', '${pwd}', 0);`;
             await this.client.query(query);
             return email;
         } catch (error) {
@@ -45,10 +45,6 @@ export class UsersRepository implements PostgresRepository {
             this.logger.error("Error while deleting data by email");
             throw error;
         }
-    }
-
-    public async update(...args: any): Promise<any> {
-        throw new Error("Method not implemented.");
     }
 
     /* Views */
@@ -81,7 +77,6 @@ export class UsersRepository implements PostgresRepository {
         const key = isNaN(Number(arg)) ? "email" : "id";
         try {
             const query = `SELECT * FROM all_users WHERE ${key} = '${arg}'`;
-            this.logger.info(query);
             const result = await this.client.query(query);
             return result.rows[0];
         } catch (error) {
@@ -99,7 +94,6 @@ export class UsersRepository implements PostgresRepository {
         try {
             const query = `CALL ${procedure}('${arg}')`;
             const result = await this.client.query(query);
-            this.logger.info(query);
             return result.rows[0];            
         } catch (error) {
             this.logger.error("Error while deleting user");

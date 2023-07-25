@@ -44,9 +44,9 @@ export class UserController implements Controller {
         if(!req.body) this.logger.error("Request body is undefined");
 
         try {
-            const { body: { username, email, password } } = req as any;
+            const { body: { username, email, pwd } } = req as any;
 
-            const newUser = await this.userService.register({username, email, password});
+            const newUser = await this.userService.register({username, email, pwd});
             
             return res.status(201).json({ 
                 success: true,
@@ -68,11 +68,12 @@ export class UserController implements Controller {
         if(!req.body) this.logger.error("Request body is undefined");
 
         try {
-            const { email, password } = req.body as any;
-            const token = await this.userService.login({ email, password });
+            const { email, pwd } = req.body as any;
+            const token = await this.userService.login({ email, pwd });
             return res.status(200).json({
                 success: true,
                 data: token,
+                // add user field
                 message: "Signed in successfully"
             });
         } catch (error) {

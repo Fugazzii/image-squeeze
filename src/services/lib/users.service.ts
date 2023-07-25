@@ -17,7 +17,7 @@ export class UserService {
         this.jwt_secret = process.env.JWT_SECRET as string;
     }
 
-    public async register({ username, email, password }: UserRegisterInterface) {
+    public async register({ username, email, pwd }: UserRegisterInterface) {
         try {
             const exists = Boolean(await this.usersRepository.findOne(email));
 
@@ -25,7 +25,9 @@ export class UserService {
                 throw new Error("User already exists");
             }
 
-            const newUserEmail: string = await this.usersRepository.insert(username, email, password);
+            const newUserEmail: string = await this.usersRepository.insert({
+                username, email, pwd
+            });
 
             let token = jwt.sign(
                 { email: newUserEmail }, 
@@ -41,13 +43,13 @@ export class UserService {
         }
     }
 
-    public async login({ email, password }: UserLoginInterface) {
+    public async login({ email, pwd }: UserLoginInterface) {
         const user = await this.usersRepository.findOne(email);
 
         if(!user) throw new Error("User not found");
 
         try {
-            const isMatch = user.pwd === password;
+            const isMatch = user.pwd === pwd;
         
             if(!isMatch) throw new Error("Passwords does not match!");
     

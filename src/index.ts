@@ -9,6 +9,7 @@ import { UserService } from "./services";
 
 import { bootstrap } from "./utils/container/bootstrap";
 
+
 import { 
     AUTH_MIDDLEWARE,
     EXPRESS_SERVER_TOKEN, 
@@ -49,7 +50,6 @@ class App {
         // await this.database.createTables();
 
         this.initializeControllers();
-
         this.server.listen(3000, () => this.logger.info("Server is listening!"));
     }
 
