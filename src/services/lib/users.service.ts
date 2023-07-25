@@ -44,29 +44,35 @@ export class UserService {
     public async login({ email, password }: UserLoginInterface) {
         const user = await this.usersRepository.findOne(email);
 
-        if(!user) {
-            throw new Error("User not found");
-        }
+        if(!user) throw new Error("User not found");
 
-        console.log(user);
-
-        const isMatch = user.pwd === password;
+        try {
+            const isMatch = user.pwd === password;
         
-        if(!isMatch) {
-            throw new Error("Passwords does not match!");
+            if(!isMatch) throw new Error("Passwords does not match!");
+    
+            let token = jwt.sign({ email }, this.jwt_secret, { expiresIn: this.jwt_expires })
+    
+            return token;                
+        } catch (error) {
+            throw error;
         }
-
-        this.logger.warn("before token");
-
-        let token = jwt.sign({ email }, this.jwt_secret, { expiresIn: this.jwt_expires })
-
-        this.logger.warn(token);
-
-        return token;
     }
 
-    public async findAll(): Promise<Array<UserInterface>> {
-        return await this.usersRepository.findAll();
+    public findAll(): Promise<Array<UserInterface>> {
+        return this.usersRepository.findAll();
+    }
+
+    public findOne(id: number): Promise<any>;
+    public findOne(email: string): Promise<any>;
+    public findOne(arg: number | string): Promise<any> {
+        return this.usersRepository.findOne(arg);
+    }
+
+    public deleteOne(id: number): Promise<any>;
+    public deleteOne(email: string): Promise<any>;
+    public deleteOne(arg: number | string): Promise<any> {
+        return this.usersRepository.deleteOne(arg);
     }
 
     public ping(): string {

@@ -23,7 +23,7 @@ export class UsersRepository implements PostgresRepository {
         } catch (error) {
             throw error;
         }
-    }
+    }   
 
     public async delete(id: number): Promise<any> {
         try {
@@ -68,7 +68,6 @@ export class UsersRepository implements PostgresRepository {
         try {
             const query = `SELECT * FROM all_users`;
             const result = await this.client.query(query);
-            console.log(result);
             return result.rows[0];
         } catch (error) {
             this.logger.error("Error while getting all users");
@@ -79,18 +78,34 @@ export class UsersRepository implements PostgresRepository {
     public async findOne(id: number): Promise<any>;
     public async findOne(email: string): Promise<any>;
     public async findOne(arg: number | string): Promise<any> {
-        
-        const key = typeof arg === "number" ? "id" : "email";
-        
+        const key = isNaN(Number(arg)) ? "email" : "id";
         try {
-            const query = `SELECT * FROM users WHERE ${key} = '${arg}'`;
+            const query = `SELECT * FROM all_users WHERE ${key} = '${arg}'`;
+            this.logger.info(query);
             const result = await this.client.query(query);
             return result.rows[0];
         } catch (error) {
-            this.logger.error("Error while retrieving user using id");
+            this.logger.error("Error while retrieving user");
             throw error;
         }
         
+    }
+
+    public async deleteOne(id: number): Promise<any>;
+    public async deleteOne(email: string): Promise<any>;
+    public async deleteOne(arg: string | number): Promise<any> {
+        const procedure = isNaN(Number(arg)) ? "delete_user_from_email" : "delete_user";
+
+        try {
+            const query = `CALL ${procedure}('${arg}')`;
+            const result = await this.client.query(query);
+            this.logger.info(query);
+            return result.rows[0];            
+        } catch (error) {
+            this.logger.error("Error while deleting user");
+            this.logger.error(error);
+            throw error;
+        }
     }
 
     public ping(): string {

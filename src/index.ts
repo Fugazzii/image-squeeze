@@ -21,7 +21,7 @@ import { AuthMiddleware } from "./middlewares";
 
 configDotenv();
 
-/* App root */
+/* App root, Nini magaria */
 
 class App {
 
@@ -57,6 +57,7 @@ class App {
         this.logger.info("Initializing controllers");
         const userService = this.container.get<UserService>(USERS_SERVICE_TOKEN);
         const authMiddleware = this.container.get<AuthMiddleware>(AUTH_MIDDLEWARE);
+
         const userController = new UserController(
             this.logger,
             userService,

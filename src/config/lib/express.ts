@@ -18,20 +18,20 @@ export class ExpressServer implements Server {
         this.server.listen(port, cb);
     }
 
-    public get(path: string, cb: any) {
-        this.router.get(path, cb);
+    public get(path: string, ...cb: any) {
+        this.router.get(path, ...cb);
     }
 
-    public post(path: string, cb: any) {
-        this.router.post(path, cb);
+    public post(path: string, ...cb: any) {
+        this.router.post(path, ...cb);
     }
 
-    public delete(path: string, cb: any) {
-        this.router.delete(path, cb);
+    public delete(path: string, ...cb: any) {
+        this.router.delete(path, ...cb);
     }
 
-    public put(path: string, cb: any) {
-        this.router.put(path, cb);
+    public put(path: string, ...cb: any) {
+        this.router.put(path, ...cb);
     }
 
     public use() {

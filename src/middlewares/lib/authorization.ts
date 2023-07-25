@@ -16,7 +16,7 @@ export class AuthMiddleware {
         @inject(USERS_REPOSITORY) private readonly userRepository: PostgresRepository
     ) {}
 
-    public async isAuth(req: Req, res: Response, next: NextFunction) {
+    public isAuth = async (req: Req, res: Response, next: NextFunction) => {
         let token: string | null = null;
 
         if(req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
@@ -33,12 +33,12 @@ export class AuthMiddleware {
                 process.env.JWT_SECRET as string
             ) as jwt.JwtPayload;
 
-            const user = await this.userRepository.findOne(decoded.id);
-
+            const user = await this.userRepository.findOne(decoded.email);
+            
             if(!user) {
                 return next(new Error('User does not exist'));
             }
-    
+
             req.user = user;
             next();
         } catch (error) {

@@ -49,7 +49,7 @@ export async function bootstrap(): Promise<Container> {
       container
         .bind<AuthMiddleware>(AUTH_MIDDLEWARE)
         .to(AuthMiddleware)
-        .inSingletonScope()
+        .inRequestScope()
 
       container
         .bind<UserService>(USERS_SERVICE_TOKEN)

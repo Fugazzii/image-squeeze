@@ -1,7 +1,7 @@
 -- Fetch all users
 BEGIN TRANSACTION;
     CREATE OR REPLACE VIEW all_users AS
-    SELECT username, email, balance FROM users
+    SELECT id, username, email, balance FROM users
 COMMIT;
 
 -- Get users ids
