@@ -16,6 +16,6 @@ BEGIN
     EXCEPTION
         WHEN OTHERS THEN
             ROLLBACK;
-            RAISE;
+            RAISE;  
 END;
 $$;

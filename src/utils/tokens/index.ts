@@ -10,3 +10,5 @@ export const USERS_SERVICE_TOKEN = Symbol("USERS_SERVICE_TOKEN");
 export const PRODUCTS_SERVICE_TOKEN = Symbol("PRODUCTS_SERVICE_TOKEN");
 
 export const PG_CONNECTION = Symbol("PG_CONNECTION");
+
+export const AUTH_MIDDLEWARE = Symbol("AUTH_MIDDLEWARE");

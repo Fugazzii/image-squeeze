@@ -13,19 +13,19 @@ export class PinoLogger implements Logger {
     }));
   }
 
-  public info(msg: string): void {
-    this.logger.info(msg);
+  public info(...args: any): void {
+    this.logger.info(args.toString());
   }
 
-  public error(msg: string): void {
-    this.logger.error(msg);
+  public error(...args: any): void {
+    this.logger.error(args.toString());
   }
 
-  public warn(msg: string): void {
-    this.logger.warn(msg);
+  public warn(...args: any): void {
+    this.logger.warn(args.toString());
   }
 
-  public debug(msg: string): void {
-    this.logger.debug(msg);
+  public debug(...args: any): void {
+    this.logger.debug(args.toString());
   }
 }

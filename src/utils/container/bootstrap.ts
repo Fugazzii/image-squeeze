@@ -6,6 +6,7 @@ import { ProductsRepository, UsersRepository } from "@src/repositories/";
 import { Server, Database, Logger, PostgresRepository } from "@src/interfaces";
 
 import { 
+  AUTH_MIDDLEWARE,
   EXPRESS_SERVER_TOKEN, 
   PINO_TOKEN, 
   POSTGRES_TOKEN, 
@@ -14,6 +15,7 @@ import {
   USERS_REPOSITORY, 
   USERS_SERVICE_TOKEN
 } from "@src/utils/tokens";
+import { AuthMiddleware } from "@src/middlewares/lib/authorization";
 
 
 export async function bootstrap(): Promise<Container> {
@@ -43,6 +45,11 @@ export async function bootstrap(): Promise<Container> {
         .bind<PostgresRepository>(USERS_REPOSITORY)
         .to(UsersRepository)
         .inSingletonScope();
+
+      container
+        .bind<AuthMiddleware>(AUTH_MIDDLEWARE)
+        .to(AuthMiddleware)
+        .inSingletonScope()
 
       container
         .bind<UserService>(USERS_SERVICE_TOKEN)

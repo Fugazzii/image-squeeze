@@ -10,12 +10,14 @@ import { UserService } from "./services";
 import { bootstrap } from "./utils/container/bootstrap";
 
 import { 
+    AUTH_MIDDLEWARE,
     EXPRESS_SERVER_TOKEN, 
     PG_CONNECTION, 
     PINO_TOKEN, 
     POSTGRES_TOKEN, 
     USERS_SERVICE_TOKEN 
 } from "./utils/tokens";
+import { AuthMiddleware } from "./middlewares";
 
 configDotenv();
 
@@ -54,7 +56,12 @@ class App {
     public initializeControllers() {
         this.logger.info("Initializing controllers");
         const userService = this.container.get<UserService>(USERS_SERVICE_TOKEN);
-        const userController = new UserController(userService);
+        const authMiddleware = this.container.get<AuthMiddleware>(AUTH_MIDDLEWARE);
+        const userController = new UserController(
+            this.logger,
+            userService,
+            authMiddleware
+        );
 
         this.controllers.push(userController);
 

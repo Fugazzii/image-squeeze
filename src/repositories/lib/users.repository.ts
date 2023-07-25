@@ -8,17 +8,20 @@ export class UsersRepository implements PostgresRepository {
 
     public constructor(
         @inject(PINO_TOKEN) private readonly logger: Logger,
-        @inject(PG_CONNECTION) private readonly client: pg.Client
+        @inject(PG_CONNECTION) private readonly client: pg.Client,
     ) {}
+    
+
+    /* Procedures */
 
     public async insert(username: string, email: string, password: string): Promise<any> {
         this.logger.warn("Password need to be hashed");
         try {
-            const query = `CALL register_new_user(${username}, ${email}, ${password}, 0);`;
-            const result = await this.client.query(query);
-            return result.rows[0];
+            const query = `CALL register_new_user('${username}', '${email}', '${password}', 0);`;
+            await this.client.query(query);
+            return email;
         } catch (error) {
-            throw new Error("Error inserting data into the database.");
+            throw error;
         }
     }
 
@@ -28,21 +31,66 @@ export class UsersRepository implements PostgresRepository {
             const result = await this.client.query(query);
             return result.rows[0];
         } catch (error) {
-            throw new Error("Error inserting data into the database.");
+            this.logger.error("Error while deleting data");
+            throw error;
         }
     }
 
-    public async update(id: number, data: any): Promise<any> {
+    public async deleteUserByEmail(email: string) {
         try {
-            const updateValues = Object.entries(data)
-                .map(([key, value]) => `${key} = '${value}'`)
-                .join(", ");
-            const query = `UPDATE users SET ${updateValues} WHERE id = ${id} RETURNING *`;
+            const query = `CALL delete_user_from_email(${email});`;
             const result = await this.client.query(query);
             return result.rows[0];
         } catch (error) {
-            throw new Error("Error updating data in the database.");
+            this.logger.error("Error while deleting data by email");
+            throw error;
         }
+    }
+
+    public async update(...args: any): Promise<any> {
+        throw new Error("Method not implemented.");
+    }
+
+    /* Views */
+
+    public async findAllIds() {
+        try {
+            const query = `SELECT * FROM all_users_id`;
+            const result = await this.client.query(query);
+            return result.rows[0];
+        } catch (error) {
+            this.logger.error("Error while getting all users using id");
+            throw error;
+        }
+    }
+
+    public async findAll() {
+        try {
+            const query = `SELECT * FROM all_users`;
+            const result = await this.client.query(query);
+            console.log(result);
+            return result.rows[0];
+        } catch (error) {
+            this.logger.error("Error while getting all users");
+            throw error;
+        }
+    }
+
+    public async findOne(id: number): Promise<any>;
+    public async findOne(email: string): Promise<any>;
+    public async findOne(arg: number | string): Promise<any> {
+        
+        const key = typeof arg === "number" ? "id" : "email";
+        
+        try {
+            const query = `SELECT * FROM users WHERE ${key} = '${arg}'`;
+            const result = await this.client.query(query);
+            return result.rows[0];
+        } catch (error) {
+            this.logger.error("Error while retrieving user using id");
+            throw error;
+        }
+        
     }
 
     public ping(): string {

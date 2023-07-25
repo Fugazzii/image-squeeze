@@ -42,6 +42,12 @@ export class ProductsRepository implements PostgresRepository {
         }
     }
 
+    public findOne(id: number): Promise<any>;
+    public findOne(email: string): Promise<any>;
+    public findOne(email: unknown): Promise<any> {
+        throw new Error("Method not implemented.");
+    }
+
     public ping() {
         return "pong";
     }

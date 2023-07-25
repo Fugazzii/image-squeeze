@@ -10,8 +10,8 @@ export class ExpressServer implements Server {
     public constructor() {
         this.server = express();
         this.router = express.Router();
-        this.server.use(this.router);
         this.server.use(express.json());
+        this.server.use(this.router);
     }
 
     public listen(port: number, cb: () => void) {
