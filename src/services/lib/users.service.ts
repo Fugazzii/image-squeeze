@@ -50,7 +50,7 @@ export class UserService {
 
         try {
             const isMatch = user.pwd === pwd;
-        
+            console.log(user)
             if(!isMatch) throw new Error("Passwords does not match!");
     
             let token = jwt.sign({ email }, this.jwt_secret, { expiresIn: this.jwt_expires })

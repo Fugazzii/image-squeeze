@@ -64,7 +64,7 @@ export class UsersRepository implements PostgresRepository {
         try {
             const query = `SELECT * FROM all_users`;
             const result = await this.client.query(query);
-            return result.rows[0];
+            return result.rows;
         } catch (error) {
             this.logger.error("Error while getting all users");
             throw error;
@@ -76,7 +76,7 @@ export class UsersRepository implements PostgresRepository {
     public async findOne(arg: number | string): Promise<any> {
         const key = isNaN(Number(arg)) ? "email" : "id";
         try {
-            const query = `SELECT * FROM all_users WHERE ${key} = '${arg}'`;
+            const query = `SELECT * FROM users WHERE ${key} = '${arg}'`;
             const result = await this.client.query(query);
             return result.rows[0];
         } catch (error) {

@@ -89,7 +89,7 @@ export class UserController implements Controller {
     public async findAll(req: Request, res: Response, _next: NextFunction) {
         try {
             const users = await this.userService.findAll();
-
+                
             return res.status(200).json({
                 success: true,
                 data: users,

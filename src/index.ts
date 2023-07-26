@@ -4,8 +4,8 @@ import { config as configDotenv } from "dotenv";
 import { Container, inject } from "inversify";
 
 import { Controller, Database, Logger, Server } from "./interfaces";
-import { UserController }from "./controllers";
-import { UserService } from "./services";
+import { ProductsController, UserController }from "./controllers";
+import { ProductsService, UserService } from "./services";
 
 import { bootstrap } from "./utils/container/bootstrap";
 
@@ -16,6 +16,7 @@ import {
     PG_CONNECTION, 
     PINO_TOKEN, 
     POSTGRES_TOKEN, 
+    PRODUCTS_SERVICE_TOKEN, 
     USERS_SERVICE_TOKEN 
 } from "./utils/tokens";
 import { AuthMiddleware } from "./middlewares";
@@ -64,7 +65,16 @@ class App {
             authMiddleware
         );
 
+        const productsService = this.container.get<ProductsService>(PRODUCTS_SERVICE_TOKEN);
+
+        const productController = new ProductsController(
+            this.logger,
+            productsService,
+            authMiddleware
+        );
+
         this.controllers.push(userController);
+        this.controllers.push(productController);
 
         this.registerControllers();
     }

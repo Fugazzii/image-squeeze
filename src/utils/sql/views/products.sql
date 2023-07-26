@@ -1,7 +1,7 @@
 -- Fetch all products
 BEGIN TRANSACTION;
     CREATE OR REPLACE VIEW all_products AS
-    SELECT * FROM products
+    SELECT id, title, img, price, quantity, author_id FROM products
 COMMIT;
 
 -- Get products ids

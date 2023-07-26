@@ -1,4 +1,4 @@
-import { PostgresRepository } from "@src/interfaces";
+import { PostgresRepository, ProductInterface } from "@src/interfaces";
 import { PRODUCTS_REPOSITORY } from "@src/utils/tokens";
 import { inject, injectable } from "inversify";
 
@@ -8,15 +8,20 @@ export class ProductsService {
         @inject(PRODUCTS_REPOSITORY) private readonly productsRepository: PostgresRepository
     ) {}
 
-    public add() {
-        /* Logic */
+    public findAll() {
+        return this.productsRepository.findAll();
     }
 
-    public delete() {
-        /* Logic */
+    public findOne(id: number) {
+        return this.productsRepository.findOne(id);
     }
 
-    public edit() {
-
+    public deleteOne(id: number) {
+        return this.productsRepository.deleteOne(id);
     }
+
+    public insert(product: ProductInterface) {
+        return this.productsRepository.insert(product);
+    }
+
 }
