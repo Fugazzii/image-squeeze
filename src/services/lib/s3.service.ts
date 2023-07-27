@@ -6,25 +6,30 @@ import { injectable, inject } from "inversify";
 @injectable()
 export class S3Service {
 
+    private readonly s3: AWS.S3;
+    private readonly bucketName: string;
+
     public constructor(
         @inject(PINO_TOKEN) private readonly logger: Logger
-    ) {}
+    ) {
+      this.s3 = new AWS.S3();
+      this.bucketName  = "ecommerce-ilia";
+    }
 
     public upload = async (file: any): Promise<string> => {
       try {
-        const s3 = new AWS.S3();
-        const bucketName = "ecommerce-ilia";
         const s3Key = `uploads/${file.originalname}`;
   
         const params: AWS.S3.PutObjectRequest = {
-          Bucket: bucketName,
+          Bucket: this.bucketName,
           Key: s3Key,
           Body: file.buffer,
           ContentType: file.mimetype,
           ACL: "public-read"
         };
   
-        const s3Response = await s3.upload(params).promise();
+        const s3Response = await this.s3.upload(params).promise();
+
         return s3Response.Location;
       } catch (error) {
         this.logger.error(error);

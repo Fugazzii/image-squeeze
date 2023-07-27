@@ -5,3 +5,4 @@ export * from "./lib/server.interface";
 export * from "./lib/controller.interface";
 export * from "./lib/user.interface";
 export * from "./lib/product.interface";
+export * from "./lib/compressor.interface";

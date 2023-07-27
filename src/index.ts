@@ -3,9 +3,9 @@ import pg from "pg";
 import { config as configDotenv } from "dotenv";
 import { Container, inject } from "inversify";
 
-import { Controller, Database, Logger, Server } from "./interfaces";
+import { Compressor, Controller, Database, Logger, Server } from "./interfaces";
 import { ProductsController, UserController }from "./controllers";
-import { ProductsService, UserService } from "./services";
+import { ProductsService, S3Service, UserService } from "./services";
 
 import { bootstrap } from "./utils/container/bootstrap";
 
@@ -18,6 +18,7 @@ import {
     PINO_TOKEN, 
     POSTGRES_TOKEN, 
     PRODUCTS_SERVICE_TOKEN, 
+    RUST_COMPRESSOR_TOKEN, 
     S3_SERVICE_TOKEN, 
     USERS_SERVICE_TOKEN 
 } from "./utils/tokens";
@@ -69,7 +70,8 @@ class App {
         const userService = this.container.get<UserService>(USERS_SERVICE_TOKEN);
         const authMiddleware = this.container.get<AuthMiddleware>(AUTH_MIDDLEWARE);
         const filehandlerMiddleware = this.container.get<Filehandler>(FILEHANDLER_MIDDLEWARE);
-        const s3Service = this.container.get<s3Service>(S3_SERVICE_TOKEN);
+        const s3Service = this.container.get<S3Service>(S3_SERVICE_TOKEN);
+        const Compressor = this.container.get<Compressor>(RUST_COMPRESSOR_TOKEN);
 
         const userController = new UserController(
             this.logger,
@@ -84,7 +86,8 @@ class App {
             productsService,
             authMiddleware,
             filehandlerMiddleware,
-            s3Service
+            s3Service,
+            Compressor
         );
 
         this.controllers.push(userController);

@@ -2,12 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import { injectable } from "inversify";
 import multer from "multer";
 
-// interface RequestWithImage extends Request {
-//   files: {
-//     img: Express.Multer.File;
-//   };
-// }
-
 @injectable()
 export class Filehandler {
   private upload: multer.Multer;
@@ -31,6 +25,4 @@ export class Filehandler {
       }
     });
   };
-
-  
 }

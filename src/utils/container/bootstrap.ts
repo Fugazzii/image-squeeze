@@ -1,9 +1,9 @@
 import { Container } from "inversify";
 
-import { PinoLogger, ProductsService, S3Service, UserService } from "@src/services/";
+import { PinoLogger, ProductsService, RustCompressor, S3Service, UserService } from "@src/services/";
 import { ExpressServer, Postgres } from "@src/config";
 import { ProductsRepository, UsersRepository } from "@src/repositories/";
-import { Server, Database, Logger, PostgresRepository } from "@src/interfaces";
+import { Server, Database, Logger, PostgresRepository, Compressor } from "@src/interfaces";
 
 import { 
   AUTH_MIDDLEWARE,
@@ -13,12 +13,12 @@ import {
   POSTGRES_TOKEN, 
   PRODUCTS_REPOSITORY, 
   PRODUCTS_SERVICE_TOKEN, 
+  RUST_COMPRESSOR_TOKEN, 
   S3_SERVICE_TOKEN, 
   USERS_REPOSITORY, 
   USERS_SERVICE_TOKEN
 } from "@src/utils/tokens";
-import { AuthMiddleware } from "@src/middlewares/lib/authorization";
-import { Filehandler } from "@src/middlewares";
+import { Filehandler, AuthMiddleware } from "@src/middlewares";
 
 export async function bootstrap(): Promise<Container> {
   return new Promise<Container>((resolve, reject) => {
@@ -61,6 +61,11 @@ export async function bootstrap(): Promise<Container> {
       container
         .bind<S3Service>(S3_SERVICE_TOKEN)
         .to(S3Service)
+        .inRequestScope()
+
+      container
+        .bind<Compressor>(RUST_COMPRESSOR_TOKEN)
+        .to(RustCompressor)
         .inRequestScope()
 
       container
