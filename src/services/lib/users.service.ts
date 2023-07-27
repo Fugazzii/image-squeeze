@@ -25,12 +25,14 @@ export class UserService {
                 throw new Error("User already exists");
             }
 
-            const newUserEmail: string = await this.usersRepository.insert({
+            const newUser = await this.usersRepository.insert({
                 username, email, pwd
             });
 
+            console.log(newUser);
+
             let token = jwt.sign(
-                { email: newUserEmail }, 
+                { id: newUser.id, email: newUser.email }, 
                 this.jwt_secret, 
                 { expiresIn: this.jwt_expires }
             );
@@ -50,10 +52,10 @@ export class UserService {
 
         try {
             const isMatch = user.pwd === pwd;
-            console.log(user)
+
             if(!isMatch) throw new Error("Passwords does not match!");
     
-            let token = jwt.sign({ email }, this.jwt_secret, { expiresIn: this.jwt_expires })
+            let token = jwt.sign({ id: user.id, email: user.email }, this.jwt_secret, { expiresIn: this.jwt_expires })
     
             return token;                
         } catch (error) {

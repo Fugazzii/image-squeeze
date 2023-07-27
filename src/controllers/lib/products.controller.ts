@@ -1,22 +1,30 @@
-import { AuthMiddleware } from "@src/middlewares";
+import { AuthMiddleware, Filehandler } from "@src/middlewares";
 import { ProductsService } from "@src/services";
-import { PINO_TOKEN, AUTH_MIDDLEWARE, PRODUCTS_SERVICE_TOKEN } from "@src/utils/tokens";
+import { PINO_TOKEN, AUTH_MIDDLEWARE, PRODUCTS_SERVICE_TOKEN, FILEHANDLER_MIDDLEWARE } from "@src/utils/tokens";
 import { inject } from "inversify";
 import { Controller, Logger, Server } from "@src/interfaces";
 import { Response, Request } from "express";
+import jwt from "jsonwebtoken";
 
 export class ProductsController implements Controller {
 
     public constructor(
         @inject(PINO_TOKEN) private readonly logger: Logger,
         @inject(PRODUCTS_SERVICE_TOKEN) private readonly productService: ProductsService,
-        @inject(AUTH_MIDDLEWARE) private readonly authMiddleware: AuthMiddleware
+        @inject(AUTH_MIDDLEWARE) private readonly authMiddleware: AuthMiddleware,
+        @inject(FILEHANDLER_MIDDLEWARE) private readonly filehandlerMiddleware: Filehandler
     ) {}
 
     public registerRoutes(server: Server): void {
         server.get("/products", this.authMiddleware.isAuth.bind(this), this.findAll.bind(this));
         server.get("/product/:id", this.authMiddleware.isAuth.bind(this), this.findOne.bind(this));
-        server.post("/product", this.authMiddleware.isAuth.bind(this), this.addProduct.bind(this));
+        server.post(
+            "/product",
+            this.authMiddleware.isAuth.bind(this), 
+            this.filehandlerMiddleware.single.bind(this),
+            this.filehandlerMiddleware.uploadToS3.bind(this),
+            this.addProduct.bind(this)
+        );
     }
 
     public async findAll(req: Request, res: Response) {
@@ -64,18 +72,25 @@ export class ProductsController implements Controller {
     }
 
     public async addProduct(req: Request, res: Response) {
+        console.log("req.files", req.files)
+
         if(!req || !req.method || req.method !== "POST") return new Error("Wrong method!");
         if(!req.body) this.logger.error("Request body is undefined");
         
+        const token = req.headers["authorization"]?.split(" ")[1] as string;
+        const secret = process.env.JWT_SECRET as string;
+
+        const user = jwt.verify(token, secret) as jwt.JwtPayload;
+
         try {
-            const { title, img, price, quantity, author_id, posted_at } = req.body;
+            const { title, img, price, quantity } = req.body;
 
             const data = await this.productService.insert({
                 title, 
                 img, 
                 price, 
                 quantity, 
-                author_id, 
+                author_id: user.id, 
                 posted_at: new Date()
             });
             

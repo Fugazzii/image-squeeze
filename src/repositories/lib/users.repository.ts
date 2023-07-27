@@ -18,8 +18,8 @@ export class UsersRepository implements PostgresRepository {
         this.logger.warn("Password need to be hashed");
         try {
             const query = `CALL register_new_user('${username}', '${email}', '${pwd}', 0);`;
-            await this.client.query(query);
-            return email;
+            const result = await this.client.query(query);
+            return result.rows[0];
         } catch (error) {
             throw error;
         }

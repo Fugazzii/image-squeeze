@@ -8,6 +8,7 @@ import { Server, Database, Logger, PostgresRepository } from "@src/interfaces";
 import { 
   AUTH_MIDDLEWARE,
   EXPRESS_SERVER_TOKEN, 
+  FILEHANDLER_MIDDLEWARE, 
   PINO_TOKEN, 
   POSTGRES_TOKEN, 
   PRODUCTS_REPOSITORY, 
@@ -16,7 +17,7 @@ import {
   USERS_SERVICE_TOKEN
 } from "@src/utils/tokens";
 import { AuthMiddleware } from "@src/middlewares/lib/authorization";
-
+import { Filehandler } from "@src/middlewares";
 
 export async function bootstrap(): Promise<Container> {
   return new Promise<Container>((resolve, reject) => {
@@ -50,6 +51,11 @@ export async function bootstrap(): Promise<Container> {
         .bind<AuthMiddleware>(AUTH_MIDDLEWARE)
         .to(AuthMiddleware)
         .inRequestScope()
+
+      container
+        .bind<Filehandler>(FILEHANDLER_MIDDLEWARE)
+        .to(Filehandler)
+        .inSingletonScope()
 
       container
         .bind<UserService>(USERS_SERVICE_TOKEN)

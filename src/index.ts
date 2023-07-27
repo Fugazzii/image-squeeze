@@ -13,13 +13,16 @@ import { bootstrap } from "./utils/container/bootstrap";
 import { 
     AUTH_MIDDLEWARE,
     EXPRESS_SERVER_TOKEN, 
+    FILEHANDLER_MIDDLEWARE, 
     PG_CONNECTION, 
     PINO_TOKEN, 
     POSTGRES_TOKEN, 
     PRODUCTS_SERVICE_TOKEN, 
     USERS_SERVICE_TOKEN 
 } from "./utils/tokens";
-import { AuthMiddleware } from "./middlewares";
+import { AuthMiddleware, Filehandler } from "./middlewares";
+
+import AWS from "aws-sdk";
 
 configDotenv();
 
@@ -48,6 +51,12 @@ class App {
 
         this.container.bind<pg.Client>(PG_CONNECTION).toConstantValue(this.conn);
 
+        AWS.config.update({
+            accessKeyId: "AKIARGZ5XCI5IGS2BVPL", // iLB0LuUk3xPnTlKEnUFvPibuykb+ByMfPUI/kCNb
+            secretAccessKey: "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",
+            region: "us-east-1",
+        });
+
         // await this.database.createTables();
 
         this.initializeControllers();
@@ -58,6 +67,7 @@ class App {
         this.logger.info("Initializing controllers");
         const userService = this.container.get<UserService>(USERS_SERVICE_TOKEN);
         const authMiddleware = this.container.get<AuthMiddleware>(AUTH_MIDDLEWARE);
+        const filehandlerMiddleware = this.container.get<Filehandler>(FILEHANDLER_MIDDLEWARE);
 
         const userController = new UserController(
             this.logger,
@@ -70,7 +80,8 @@ class App {
         const productController = new ProductsController(
             this.logger,
             productsService,
-            authMiddleware
+            authMiddleware,
+            filehandlerMiddleware
         );
 
         this.controllers.push(userController);

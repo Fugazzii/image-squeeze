@@ -13,7 +13,9 @@ export class ExpressServer implements Server {
         this.server = express();
         this.router = express.Router();
         this.server.use(express.json());
-    	this.server.use(cors());
+        this.server.use(cors({
+            origin: '*'
+        }));
         this.server.use(this.router);
     }
 
