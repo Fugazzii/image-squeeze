@@ -8,6 +8,7 @@ export const EXPRESS_SERVER_TOKEN = Symbol("EXPRESS_SERVER_TOKEN");
 
 export const USERS_SERVICE_TOKEN = Symbol("USERS_SERVICE_TOKEN");
 export const PRODUCTS_SERVICE_TOKEN = Symbol("PRODUCTS_SERVICE_TOKEN");
+export const S3_SERVICE_TOKEN = Symbol("S3_SERVICE_TOKEN");
 
 export const PG_CONNECTION = Symbol("PG_CONNECTION");
 

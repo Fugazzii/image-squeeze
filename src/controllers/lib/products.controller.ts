@@ -1,6 +1,6 @@
 import { AuthMiddleware, Filehandler } from "@src/middlewares";
-import { ProductsService } from "@src/services";
-import { PINO_TOKEN, AUTH_MIDDLEWARE, PRODUCTS_SERVICE_TOKEN, FILEHANDLER_MIDDLEWARE } from "@src/utils/tokens";
+import { ProductsService, S3Service } from "@src/services";
+import { PINO_TOKEN, AUTH_MIDDLEWARE, PRODUCTS_SERVICE_TOKEN, FILEHANDLER_MIDDLEWARE, S3_SERVICE_TOKEN } from "@src/utils/tokens";
 import { inject } from "inversify";
 import { Controller, Logger, Server } from "@src/interfaces";
 import { Response, Request } from "express";
@@ -12,7 +12,8 @@ export class ProductsController implements Controller {
         @inject(PINO_TOKEN) private readonly logger: Logger,
         @inject(PRODUCTS_SERVICE_TOKEN) private readonly productService: ProductsService,
         @inject(AUTH_MIDDLEWARE) private readonly authMiddleware: AuthMiddleware,
-        @inject(FILEHANDLER_MIDDLEWARE) private readonly filehandlerMiddleware: Filehandler
+        @inject(FILEHANDLER_MIDDLEWARE) private readonly filehandlerMiddleware: Filehandler,
+        @inject(S3_SERVICE_TOKEN) private readonly s3Service: S3Service
     ) {}
 
     public registerRoutes(server: Server): void {
@@ -22,13 +23,11 @@ export class ProductsController implements Controller {
             "/product",
             this.authMiddleware.isAuth.bind(this), 
             this.filehandlerMiddleware.single.bind(this),
-            this.filehandlerMiddleware.uploadToS3.bind(this),
             this.addProduct.bind(this)
         );
     }
 
     public async findAll(req: Request, res: Response) {
-        if(!req || !req.method || req.method !== "GET") throw new Error("Wrong method!");
         if(!req.body) this.logger.error("Request body is undefined");
         
         try {
@@ -50,7 +49,6 @@ export class ProductsController implements Controller {
     }
 
     public async findOne(req: Request, res: Response) {
-        if(!req || !req.method || req.method !== "GET") throw new Error("Wrong method!");
         if(!req.body) this.logger.error("Request body is undefined");
         
         try {
@@ -72,13 +70,12 @@ export class ProductsController implements Controller {
     }
 
     public async addProduct(req: Request, res: Response) {
-        console.log("req.files", req.files)
-
-        if(!req || !req.method || req.method !== "POST") return new Error("Wrong method!");
         if(!req.body) this.logger.error("Request body is undefined");
         
         const token = req.headers["authorization"]?.split(" ")[1] as string;
         const secret = process.env.JWT_SECRET as string;
+
+        this.s3Service.upload(req.file);
 
         const user = jwt.verify(token, secret) as jwt.JwtPayload;
 

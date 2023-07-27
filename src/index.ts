@@ -18,6 +18,7 @@ import {
     PINO_TOKEN, 
     POSTGRES_TOKEN, 
     PRODUCTS_SERVICE_TOKEN, 
+    S3_SERVICE_TOKEN, 
     USERS_SERVICE_TOKEN 
 } from "./utils/tokens";
 import { AuthMiddleware, Filehandler } from "./middlewares";
@@ -68,6 +69,7 @@ class App {
         const userService = this.container.get<UserService>(USERS_SERVICE_TOKEN);
         const authMiddleware = this.container.get<AuthMiddleware>(AUTH_MIDDLEWARE);
         const filehandlerMiddleware = this.container.get<Filehandler>(FILEHANDLER_MIDDLEWARE);
+        const s3Service = this.container.get<s3Service>(S3_SERVICE_TOKEN);
 
         const userController = new UserController(
             this.logger,
@@ -81,7 +83,8 @@ class App {
             this.logger,
             productsService,
             authMiddleware,
-            filehandlerMiddleware
+            filehandlerMiddleware,
+            s3Service
         );
 
         this.controllers.push(userController);
