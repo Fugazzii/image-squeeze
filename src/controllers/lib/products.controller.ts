@@ -4,16 +4,16 @@ import jwt from "jsonwebtoken";
 
 import { AuthMiddleware, Filehandler } from "@src/middlewares";
 import { ProductsService } from "@src/services";
-import { CloudService, Compressor, Controller, Logger, Server } from "@src/interfaces";
+import { Controller, Logger, Server } from "@src/interfaces";
 
 import { 
     PINO_TOKEN, 
     AUTH_MIDDLEWARE, 
     PRODUCTS_SERVICE_TOKEN, 
-    FILEHANDLER_MIDDLEWARE, 
-    S3_SERVICE_TOKEN, 
-    RUST_COMPRESSOR_TOKEN 
+    FILEHANDLER_MIDDLEWARE,
+    ERROR_HANDLER
 } from "@src/utils/tokens";
+import { ErrorHandler } from "@src/utils/handlers";
 
 export class ProductsController implements Controller {
 
@@ -21,7 +21,8 @@ export class ProductsController implements Controller {
         @inject(PINO_TOKEN) private readonly logger: Logger,
         @inject(PRODUCTS_SERVICE_TOKEN) private readonly productService: ProductsService,
         @inject(AUTH_MIDDLEWARE) private readonly authMiddleware: AuthMiddleware,
-        @inject(FILEHANDLER_MIDDLEWARE) private readonly filehandlerMiddleware: Filehandler
+        @inject(FILEHANDLER_MIDDLEWARE) private readonly filehandlerMiddleware: Filehandler,
+        @inject(ERROR_HANDLER) private readonly errorHandler: ErrorHandler
     ) {}
 
     public registerRoutes(server: Server): void {
@@ -47,12 +48,7 @@ export class ProductsController implements Controller {
                 message: "Successfully fetched users!"
             });
         } catch (error) {
-            this.logger.error(error);
-            return res.status(500).json({
-                success: false,
-                data: null,
-                message: "Failed to fetch products"
-            });
+            return this.errorHandler.FailedToFetchException(res, error);
         }   
     }
 
@@ -68,32 +64,14 @@ export class ProductsController implements Controller {
                 message: "Successfully fetched users!"
             });
         } catch (error) {
-            this.logger.error(error);
-            return res.status(500).json({
-                success: false,
-                data: null,
-                message: "Failed to fetch product"
-            });
+            return this.errorHandler.FailedToFetchException(res, error);
         }  
     }
 
     public async addProduct(req: Request, res: Response) {
-        if(!req.file) {
-            this.logger.error("Request file is empty")
-            return res.status(422).json({
-                success: false,
-                data: null,
-                message: "Request file is empty"
-            });
-        }
-        if(!req.body) {
-            this.logger.error("Request body is empty");
-            return res.status(422).json({
-                success: false,
-                data: null,
-                message: "Request body is empty"
-            });
-        }
+        if(!req.file) return this.errorHandler.EmptyRequestFileException(res);
+        
+        if(!req.body) return this.errorHandler.EmptyBodyException(res);
         
         const token = req.headers["authorization"]?.split(" ")[1] as string;
         const secret = process.env.JWT_SECRET as string;
@@ -101,7 +79,6 @@ export class ProductsController implements Controller {
 
         try {
             const [img_xl, img_l, img_m, img_s] = await this.productService.compressAndUpload(req.file);
-
             const { title, price, quantity } = req.body;
 
             const data = await this.productService.insert({
@@ -122,12 +99,7 @@ export class ProductsController implements Controller {
                 message: "Successfully added users!"
             });
         } catch (error) {
-            this.logger.error(error);
-            return res.status(500).json({
-                success: false,
-                data: null,
-                message: "Failed to add products"
-            });
+            return this.errorHandler.FailedToAddException(res, error);
         }  
     }
 }

@@ -15,7 +15,9 @@ enum DB_OBJECT {
 export class Postgres implements Database {
   private readonly client: pg.Client;
 
-  public constructor(@inject(PINO_TOKEN) private readonly logger: Logger) {
+  public constructor(
+    @inject(PINO_TOKEN) private readonly logger: Logger
+  ) {
     const { PG_HOST, PG_PORT, PG_USER, PG_PASSWORD, PG_DB } = process.env;
     const connectionString = `postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DB}`;
     this.client = new pg.Client({ connectionString });

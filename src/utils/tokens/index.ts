@@ -15,3 +15,6 @@ export const PG_CONNECTION = Symbol("PG_CONNECTION");
 
 export const AUTH_MIDDLEWARE = Symbol("AUTH_MIDDLEWARE");
 export const FILEHANDLER_MIDDLEWARE = Symbol("FILEHANDLER_MIDDLEWARE");
+
+export const RESPONSE_HANDLER = Symbol("RESPONSE_HANDLER");
+export const ERROR_HANDLER = Symbol("ERROR_HANDLER");

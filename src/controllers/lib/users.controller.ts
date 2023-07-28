@@ -6,16 +6,19 @@ import { inject } from "inversify";
 
 import { 
     AUTH_MIDDLEWARE, 
+    ERROR_HANDLER, 
     PINO_TOKEN,
     USERS_SERVICE_TOKEN
 } from "@src/utils/tokens";
+import { ErrorHandler } from "@src/utils/handlers";
 
 export class UserController implements Controller {
     
     public constructor(
         @inject(PINO_TOKEN) private readonly logger: Logger,
         @inject(USERS_SERVICE_TOKEN) private readonly userService: UserService,
-        @inject(AUTH_MIDDLEWARE) private readonly authMiddleware: AuthMiddleware
+        @inject(AUTH_MIDDLEWARE) private readonly authMiddleware: AuthMiddleware,
+        @inject(ERROR_HANDLER) private readonly errorHandler: ErrorHandler
     ) {}
 
     public registerRoutes(server: Server) {
@@ -55,11 +58,7 @@ export class UserController implements Controller {
             });
 
         } catch (error) {
-            return res.status(500).json({ 
-                success: false,
-                data: error,
-                message: "Error while registering user"
-            });
+            return this.errorHandler.UnsuccessfulRegistrationException(res, error);
         }
     }
 
@@ -76,12 +75,7 @@ export class UserController implements Controller {
                 message: "Signed in successfully"
             });
         } catch (error) {
-            this.logger.error(error);
-            return res.status(404).json({
-                success: false,
-                data: error,
-                message: "Failed to sign in"
-            });
+            return this.errorHandler.UnsuccessfulLoginException(res, error);
         }
     }
 
@@ -95,12 +89,7 @@ export class UserController implements Controller {
                 message: "Fetched all users"
             });
         } catch (error) {
-            this.logger.error(error);
-            return res.status(200).json({
-                success: false,
-                data: [],
-                message: "Failed to fetch all users"
-            });
+            return this.errorHandler.FailedToFetchException(res, error);
         }
     }
 
@@ -123,24 +112,11 @@ export class UserController implements Controller {
                 message: "Successfully found user"
             });
         } catch (error) {
-            this.logger.error(error);
-            return res.status(409).json({
-                success: false,
-                data: [],
-                message: "Failed to found user"
-            });
+            return this.errorHandler.NotFoundTargetException(res, error);
         }
     }
 
     public async deleteOne(req: Request, res: Response) {
-        if(!req || !req.method || req.method.toUpperCase() !== "DELETE") {
-            return res.status(405).json({
-                success: false,
-                data: null,
-                message: `Wrong method for deleting user`
-            });
-        }
-        
         try {
             const { id } = req.params;
             this.logger.info(`Deleting user with id... ${id}`);
@@ -151,22 +127,17 @@ export class UserController implements Controller {
                 message: "Successfully deleted user"
             });
         } catch (error) {
-            this.logger.error(error);
-            return res.status(409).json({
-                success: false,
-                data: [],
-                message: "Failed to delete user"
-            });
+            return this.errorHandler.FailedDeleteException(res, error);
         }
         
     }
 
-    private ping(req: Request, res: Response) {
+    private ping(_req: Request, res: Response) {
         try {
             const response = this.userService.ping();
-            res.status(200).json(response);
+            return res.status(200).json(response);
         } catch (error) {
-            res.status(500).json({ error: "Internal Server Error" });
+            return this.errorHandler.InternalServerErrorException(res, error);
         }
     }
 

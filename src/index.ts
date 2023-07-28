@@ -11,6 +11,7 @@ import { bootstrap } from "./utils/container/bootstrap";
 
 import { 
     AUTH_MIDDLEWARE,
+    ERROR_HANDLER,
     EXPRESS_SERVER_TOKEN, 
     FILEHANDLER_MIDDLEWARE, 
     PG_CONNECTION, 
@@ -22,6 +23,7 @@ import {
 import { AuthMiddleware, Filehandler } from "./middlewares";
 
 import AWS from "aws-sdk";
+import { ErrorHandler } from "./utils/handlers";
 
 configDotenv();
 
@@ -65,11 +67,13 @@ class App {
         const userService = this.container.get<UserService>(USERS_SERVICE_TOKEN);
         const authMiddleware = this.container.get<AuthMiddleware>(AUTH_MIDDLEWARE);
         const filehandlerMiddleware = this.container.get<Filehandler>(FILEHANDLER_MIDDLEWARE);
+        const errorHandler = this.container.get<ErrorHandler>(ERROR_HANDLER);
 
         const userController = new UserController(
             this.logger,
             userService,
-            authMiddleware
+            authMiddleware,
+            errorHandler
         );
 
         const productsService = this.container.get<ProductsService>(PRODUCTS_SERVICE_TOKEN);
@@ -78,7 +82,8 @@ class App {
             this.logger,
             productsService,
             authMiddleware,
-            filehandlerMiddleware
+            filehandlerMiddleware,
+            errorHandler
         );
 
         this.controllers.push(userController);

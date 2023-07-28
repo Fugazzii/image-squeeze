@@ -2,7 +2,7 @@ interface Entity {
     id: number
 }
 
-export abstract class PostgresRepository {
+export abstract class AbstactPostgresRepository {
 
     public constructor(private readonly entity: Entity) {}
 

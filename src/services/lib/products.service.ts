@@ -8,7 +8,6 @@ export class ProductsService {
     
     private readonly qualities: Array<number>;
 
-
     public constructor(
         @inject(PRODUCTS_REPOSITORY) private readonly productsRepository: PostgresRepository,
         @inject(RUST_COMPRESSOR_TOKEN) private readonly compressorService: Compressor,

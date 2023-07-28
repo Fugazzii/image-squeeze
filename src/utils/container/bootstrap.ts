@@ -19,6 +19,7 @@ import {
   USERS_SERVICE_TOKEN
 } from "@src/utils/tokens";
 import { Filehandler, AuthMiddleware } from "@src/middlewares";
+import { ErrorHandler } from "../handlers";
 
 export async function bootstrap(): Promise<Container> {
   return new Promise<Container>((resolve, reject) => {
@@ -75,6 +76,11 @@ export async function bootstrap(): Promise<Container> {
       container
         .bind<ProductsService>(PRODUCTS_SERVICE_TOKEN)
         .to(ProductsService)
+        .inRequestScope();
+
+      container
+        .bind<ErrorHandler>(ErrorHandler)
+        .to(ErrorHandler)
         .inRequestScope();
 
       resolve(container);
