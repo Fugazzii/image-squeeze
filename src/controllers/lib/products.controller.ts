@@ -11,9 +11,10 @@ import {
     AUTH_MIDDLEWARE, 
     PRODUCTS_SERVICE_TOKEN, 
     FILEHANDLER_MIDDLEWARE,
-    ERROR_HANDLER
+    ERROR_HANDLER,
+    RESPONSE_HANDLER
 } from "@src/utils/tokens";
-import { ErrorHandler } from "@src/utils/handlers";
+import { ErrorHandler, ResponseHandler } from "@src/utils/handlers";
 
 export class ProductsController implements Controller {
 
@@ -22,7 +23,8 @@ export class ProductsController implements Controller {
         @inject(PRODUCTS_SERVICE_TOKEN) private readonly productService: ProductsService,
         @inject(AUTH_MIDDLEWARE) private readonly authMiddleware: AuthMiddleware,
         @inject(FILEHANDLER_MIDDLEWARE) private readonly filehandlerMiddleware: Filehandler,
-        @inject(ERROR_HANDLER) private readonly errorHandler: ErrorHandler
+        @inject(ERROR_HANDLER) private readonly errorHandler: ErrorHandler,
+        @inject(RESPONSE_HANDLER) private readonly responseHandler: ResponseHandler
     ) {}
 
     public registerRoutes(server: Server): void {
@@ -36,33 +38,23 @@ export class ProductsController implements Controller {
         );
     }
 
-    public async findAll(req: Request, res: Response) {
-        if(!req.body) this.logger.error("Request body is undefined");
-        
+    public async findAll(_req: Request, res: Response) {        
         try {
             const data = await this.productService.findAll();
             
-            return res.status(200).json({
-                success: true,
-                data,
-                message: "Successfully fetched users!"
-            });
+            return this.responseHandler.FetchedAllDataResponse(res, data);
         } catch (error) {
             return this.errorHandler.FailedToFetchException(res, error);
         }   
     }
 
     public async findOne(req: Request, res: Response) {
-        if(!req.body) this.logger.error("Request body is undefined");
+        if(!req.body) return this.errorHandler.EmptyBodyException(res);
         
         try {
             const data = await this.productService.findOne(Number(req.params.id));
             
-            return res.status(200).json({
-                success: true,
-                data,
-                message: "Successfully fetched users!"
-            });
+            return this.responseHandler.FoundDataResponse(res, data);
         } catch (error) {
             return this.errorHandler.FailedToFetchException(res, error);
         }  
@@ -70,7 +62,6 @@ export class ProductsController implements Controller {
 
     public async addProduct(req: Request, res: Response) {
         if(!req.file) return this.errorHandler.EmptyRequestFileException(res);
-        
         if(!req.body) return this.errorHandler.EmptyBodyException(res);
         
         const token = req.headers["authorization"]?.split(" ")[1] as string;
@@ -93,11 +84,7 @@ export class ProductsController implements Controller {
                 posted_at: new Date()
             });
             
-            return res.status(200).json({
-                success: true,
-                data,
-                message: "Successfully added users!"
-            });
+            return this.responseHandler.AddedDataResponse(res, data);
         } catch (error) {
             return this.errorHandler.FailedToAddException(res, error);
         }  

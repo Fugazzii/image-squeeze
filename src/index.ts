@@ -18,12 +18,13 @@ import {
     PINO_TOKEN, 
     POSTGRES_TOKEN, 
     PRODUCTS_SERVICE_TOKEN, 
+    RESPONSE_HANDLER, 
     USERS_SERVICE_TOKEN 
 } from "./utils/tokens";
 import { AuthMiddleware, Filehandler } from "./middlewares";
 
 import AWS from "aws-sdk";
-import { ErrorHandler } from "./utils/handlers";
+import { ErrorHandler, ResponseHandler } from "./utils/handlers";
 
 configDotenv();
 
@@ -56,6 +57,7 @@ class App {
             region: process.env.AWS_REGION,
         });
 
+        // Reconfigure database (?)
         // await this.database.build();            
 
         this.initializeControllers();
@@ -68,12 +70,14 @@ class App {
         const authMiddleware = this.container.get<AuthMiddleware>(AUTH_MIDDLEWARE);
         const filehandlerMiddleware = this.container.get<Filehandler>(FILEHANDLER_MIDDLEWARE);
         const errorHandler = this.container.get<ErrorHandler>(ERROR_HANDLER);
+        const responseHandler = this.container.get<ResponseHandler>(RESPONSE_HANDLER);
 
         const userController = new UserController(
             this.logger,
             userService,
             authMiddleware,
-            errorHandler
+            errorHandler,
+            responseHandler
         );
 
         const productsService = this.container.get<ProductsService>(PRODUCTS_SERVICE_TOKEN);
@@ -83,7 +87,8 @@ class App {
             productsService,
             authMiddleware,
             filehandlerMiddleware,
-            errorHandler
+            errorHandler,
+            responseHandler
         );
 
         this.controllers.push(userController);

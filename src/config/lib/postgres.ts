@@ -54,9 +54,7 @@ export class Postgres implements Database {
       await this.dropIfExists("products", DB_OBJECT.TABLE);
       await this.dropIfExists("users", DB_OBJECT.TABLE);
     }
-
-
-}
+  }
 
   private async createProcedures() {
     await this.readFileAndRunQuery("src/utils/sql/procedures");

@@ -8,9 +8,10 @@ import {
     AUTH_MIDDLEWARE, 
     ERROR_HANDLER, 
     PINO_TOKEN,
+    RESPONSE_HANDLER,
     USERS_SERVICE_TOKEN
 } from "@src/utils/tokens";
-import { ErrorHandler } from "@src/utils/handlers";
+import { ErrorHandler, ResponseHandler } from "@src/utils/handlers";
 
 export class UserController implements Controller {
     
@@ -18,7 +19,8 @@ export class UserController implements Controller {
         @inject(PINO_TOKEN) private readonly logger: Logger,
         @inject(USERS_SERVICE_TOKEN) private readonly userService: UserService,
         @inject(AUTH_MIDDLEWARE) private readonly authMiddleware: AuthMiddleware,
-        @inject(ERROR_HANDLER) private readonly errorHandler: ErrorHandler
+        @inject(ERROR_HANDLER) private readonly errorHandler: ErrorHandler,
+        @inject(RESPONSE_HANDLER) private readonly responseHandler: ResponseHandler
     ) {}
 
     public registerRoutes(server: Server) {
@@ -51,12 +53,7 @@ export class UserController implements Controller {
 
             await this.userService.register({ username, email, pwd });
             
-            return res.status(201).json({ 
-                success: true,
-                data: null,
-                message: "New user has been added"
-            });
-
+            return this.responseHandler.NewUserRegisteredResponse(res, { username, email });
         } catch (error) {
             return this.errorHandler.UnsuccessfulRegistrationException(res, error);
         }
@@ -69,11 +66,8 @@ export class UserController implements Controller {
         try {
             const { email, pwd } = req.body as any;
             const token = await this.userService.login({ email, pwd });
-            return res.status(200).json({
-                success: true,
-                data: token,
-                message: "Signed in successfully"
-            });
+            
+            return this.responseHandler.SuccessfulLoginResponse(res, token);
         } catch (error) {
             return this.errorHandler.UnsuccessfulLoginException(res, error);
         }
@@ -83,34 +77,18 @@ export class UserController implements Controller {
         try {
             const users = await this.userService.findAll();
                 
-            return res.status(200).json({
-                success: true,
-                data: users,
-                message: "Fetched all users"
-            });
+            return this.responseHandler.FetchedAllDataResponse(res, users);
         } catch (error) {
             return this.errorHandler.FailedToFetchException(res, error);
         }
     }
 
     public async findOne(req: Request, res: Response) {
-        if(!req || !req.method || req.method.toUpperCase() !== "GET") {
-            return res.status(405).json({
-                success: false,
-                data: null,
-                message: `Wrong method for deleting user`
-            });
-        }
-
         try {
             const { params: { id } } = req;
-            this.logger.info(id, typeof id); // 3, string
-            const response = await this.userService.findOne(id);
-            return res.status(200).json({
-                success: true,
-                data: response,
-                message: "Successfully found user"
-            });
+            const user = await this.userService.findOne(id);
+            
+            return this.responseHandler.FoundDataResponse(res, user);
         } catch (error) {
             return this.errorHandler.NotFoundTargetException(res, error);
         }
@@ -120,12 +98,10 @@ export class UserController implements Controller {
         try {
             const { id } = req.params;
             this.logger.info(`Deleting user with id... ${id}`);
-            const response = this.userService.deleteOne(id);
-            return res.status(200).json({
-                success: true,
-                data: response,
-                message: "Successfully deleted user"
-            });
+
+            const deleted = this.userService.deleteOne(id);
+            
+            return this.responseHandler.DeletedDataResponse(res, deleted);
         } catch (error) {
             return this.errorHandler.FailedDeleteException(res, error);
         }

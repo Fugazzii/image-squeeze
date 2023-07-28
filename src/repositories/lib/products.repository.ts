@@ -9,7 +9,6 @@ export class ProductsRepository implements PostgresRepository {
     @inject(PINO_TOKEN) private readonly logger: Logger,
     @inject(PG_CONNECTION) private readonly client: pg.Client
   ) {}
-    
 
     /* Procedures */
 

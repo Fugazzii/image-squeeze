@@ -5,21 +5,24 @@ import { ExpressServer, Postgres } from "@src/config";
 import { ProductsRepository, UsersRepository } from "@src/repositories/";
 import { Server, Database, Logger, PostgresRepository, Compressor, CloudService } from "@src/interfaces";
 
+import { Filehandler, AuthMiddleware } from "@src/middlewares";
+import { ErrorHandler, ResponseHandler } from "../handlers";
+
 import { 
   AUTH_MIDDLEWARE,
+  ERROR_HANDLER,
   EXPRESS_SERVER_TOKEN, 
   FILEHANDLER_MIDDLEWARE, 
   PINO_TOKEN, 
   POSTGRES_TOKEN, 
   PRODUCTS_REPOSITORY, 
   PRODUCTS_SERVICE_TOKEN, 
+  RESPONSE_HANDLER, 
   RUST_COMPRESSOR_TOKEN, 
   S3_SERVICE_TOKEN, 
   USERS_REPOSITORY, 
   USERS_SERVICE_TOKEN
 } from "@src/utils/tokens";
-import { Filehandler, AuthMiddleware } from "@src/middlewares";
-import { ErrorHandler } from "../handlers";
 
 export async function bootstrap(): Promise<Container> {
   return new Promise<Container>((resolve, reject) => {
@@ -79,9 +82,14 @@ export async function bootstrap(): Promise<Container> {
         .inRequestScope();
 
       container
-        .bind<ErrorHandler>(ErrorHandler)
+        .bind<ErrorHandler>(ERROR_HANDLER)
         .to(ErrorHandler)
-        .inRequestScope();
+        .inSingletonScope();
+
+      container
+        .bind<ResponseHandler>(RESPONSE_HANDLER)
+        .to(ResponseHandler)
+        .inSingletonScope();
 
       resolve(container);
     } catch (error) {
