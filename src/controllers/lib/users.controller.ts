@@ -73,7 +73,6 @@ export class UserController implements Controller {
             return res.status(200).json({
                 success: true,
                 data: token,
-                // add user field
                 message: "Signed in successfully"
             });
         } catch (error) {

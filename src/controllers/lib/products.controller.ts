@@ -17,19 +17,12 @@ import {
 
 export class ProductsController implements Controller {
 
-    private readonly qualities: Array<number>;
-
-
     public constructor(
         @inject(PINO_TOKEN) private readonly logger: Logger,
         @inject(PRODUCTS_SERVICE_TOKEN) private readonly productService: ProductsService,
         @inject(AUTH_MIDDLEWARE) private readonly authMiddleware: AuthMiddleware,
-        @inject(FILEHANDLER_MIDDLEWARE) private readonly filehandlerMiddleware: Filehandler,
-        @inject(S3_SERVICE_TOKEN) private readonly s3Service: CloudService,
-        @inject(RUST_COMPRESSOR_TOKEN) private readonly compressorService: Compressor
-    ) {
-        this.qualities = new Array<number>(1080, 720, 480, 360);
-    }
+        @inject(FILEHANDLER_MIDDLEWARE) private readonly filehandlerMiddleware: Filehandler
+    ) {}
 
     public registerRoutes(server: Server): void {
         server.get("/products", this.authMiddleware.isAuth.bind(this), this.findAll.bind(this));
@@ -107,7 +100,7 @@ export class ProductsController implements Controller {
         const user = jwt.verify(token, secret) as jwt.JwtPayload;
 
         try {
-            const [img_xl, img_l, img_m, img_s] = await this.compressAndUpload(req.file);
+            const [img_xl, img_l, img_m, img_s] = await this.productService.compressAndUpload(req.file);
 
             const { title, price, quantity } = req.body;
 
@@ -115,7 +108,7 @@ export class ProductsController implements Controller {
                 title, 
                 img_xl, 
                 img_l, 
-                img_m, 
+                img_m,
                 img_s,
                 price, 
                 quantity, 
@@ -136,23 +129,5 @@ export class ProductsController implements Controller {
                 message: "Failed to add products"
             });
         }  
-    }
-
-    private async compressAndUpload(file: Express.Multer.File) {
-        const compressAndUploadTasks = this.qualities.map(async (quality) => {
-            const compressedImage = await this.compressorService.compress(file, quality);
-            compressedImage.originalname = `${quality.toString()}_${compressedImage.originalname}`;
-
-            return this.s3Service.upload(compressedImage);
-        });
-        
-        try {
-            const uploadedLocations: Array<string> = await Promise.all(compressAndUploadTasks);
-            this.logger.info("Files has been successfully uploaded to s3.");
-            return uploadedLocations;
-        } catch (error) {
-            this.logger.error(error);
-            throw error;
-        }
     }
 }

@@ -19,7 +19,6 @@ export class S3Service implements CloudService {
   public upload = async (file: any): Promise<string> => {
     try {
       const s3Key = `uploads/${file.originalname}`;
-
       const params: AWS.S3.PutObjectRequest = {
         Bucket: this.bucketName,
         Key: s3Key,
@@ -29,7 +28,6 @@ export class S3Service implements CloudService {
       };
 
       const s3Response = await this.s3.upload(params).promise();
-
       return s3Response.Location;
     } catch (error) {
       this.logger.error(error);

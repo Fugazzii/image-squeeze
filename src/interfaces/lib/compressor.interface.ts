@@ -1,3 +1,3 @@
 export interface Compressor {
-    compress(file: Express.Multer.File, quality: number): Promise<Express.Multer.File>;   
+    compress(file: any, quality: number): Promise<any>;   
 }

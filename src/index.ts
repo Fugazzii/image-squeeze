@@ -3,12 +3,11 @@ import pg from "pg";
 import { config as configDotenv } from "dotenv";
 import { Container, inject } from "inversify";
 
-import { CloudService, Compressor, Controller, Database, Logger, Server } from "./interfaces";
+import { Controller, Database, Logger, Server } from "./interfaces";
 import { ProductsController, UserController }from "./controllers";
 import { ProductsService, UserService } from "./services";
 
 import { bootstrap } from "./utils/container/bootstrap";
-
 
 import { 
     AUTH_MIDDLEWARE,
@@ -18,8 +17,6 @@ import {
     PINO_TOKEN, 
     POSTGRES_TOKEN, 
     PRODUCTS_SERVICE_TOKEN, 
-    RUST_COMPRESSOR_TOKEN, 
-    S3_SERVICE_TOKEN, 
     USERS_SERVICE_TOKEN 
 } from "./utils/tokens";
 import { AuthMiddleware, Filehandler } from "./middlewares";
@@ -27,8 +24,6 @@ import { AuthMiddleware, Filehandler } from "./middlewares";
 import AWS from "aws-sdk";
 
 configDotenv();
-
-/* App root, Nini magaria */
 
 class App {
 
@@ -54,9 +49,9 @@ class App {
         this.container.bind<pg.Client>(PG_CONNECTION).toConstantValue(this.conn);
 
         AWS.config.update({
-            accessKeyId: "AKIARGZ5XCI5IGS2BVPL",
-            secretAccessKey: "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",
-            region: "us-east-1",
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+            region: process.env.AWS_REGION,
         });
 
         // await this.database.build();            
@@ -70,8 +65,6 @@ class App {
         const userService = this.container.get<UserService>(USERS_SERVICE_TOKEN);
         const authMiddleware = this.container.get<AuthMiddleware>(AUTH_MIDDLEWARE);
         const filehandlerMiddleware = this.container.get<Filehandler>(FILEHANDLER_MIDDLEWARE);
-        const s3Service = this.container.get<CloudService>(S3_SERVICE_TOKEN);
-        const Compressor = this.container.get<Compressor>(RUST_COMPRESSOR_TOKEN);
 
         const userController = new UserController(
             this.logger,
@@ -85,9 +78,7 @@ class App {
             this.logger,
             productsService,
             authMiddleware,
-            filehandlerMiddleware,
-            s3Service,
-            Compressor
+            filehandlerMiddleware
         );
 
         this.controllers.push(userController);
