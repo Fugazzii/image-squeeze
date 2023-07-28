@@ -8,8 +8,6 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
 
-    LOCK TABLE users IN EXCLUSIVE MODE;
-
     INSERT INTO users (username, email, pwd, balance)
     VALUES (p_username, p_email, p_pwd, p_balance);
 

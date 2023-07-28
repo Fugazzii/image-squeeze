@@ -3,7 +3,7 @@ import { Container } from "inversify";
 import { PinoLogger, ProductsService, RustCompressor, S3Service, UserService } from "@src/services/";
 import { ExpressServer, Postgres } from "@src/config";
 import { ProductsRepository, UsersRepository } from "@src/repositories/";
-import { Server, Database, Logger, PostgresRepository, Compressor } from "@src/interfaces";
+import { Server, Database, Logger, PostgresRepository, Compressor, CloudService } from "@src/interfaces";
 
 import { 
   AUTH_MIDDLEWARE,
@@ -59,7 +59,7 @@ export async function bootstrap(): Promise<Container> {
         .inSingletonScope()
 
       container
-        .bind<S3Service>(S3_SERVICE_TOKEN)
+        .bind<CloudService>(S3_SERVICE_TOKEN)
         .to(S3Service)
         .inRequestScope()
 

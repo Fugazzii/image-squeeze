@@ -1,10 +1,19 @@
-import { AuthMiddleware, Filehandler } from "@src/middlewares";
-import { ProductsService, S3Service } from "@src/services";
-import { PINO_TOKEN, AUTH_MIDDLEWARE, PRODUCTS_SERVICE_TOKEN, FILEHANDLER_MIDDLEWARE, S3_SERVICE_TOKEN, RUST_COMPRESSOR_TOKEN } from "@src/utils/tokens";
-import { inject } from "inversify";
-import { Compressor, Controller, Logger, Server } from "@src/interfaces";
 import { Response, Request } from "express";
+import { inject } from "inversify";
 import jwt from "jsonwebtoken";
+
+import { AuthMiddleware, Filehandler } from "@src/middlewares";
+import { ProductsService } from "@src/services";
+import { CloudService, Compressor, Controller, Logger, Server } from "@src/interfaces";
+
+import { 
+    PINO_TOKEN, 
+    AUTH_MIDDLEWARE, 
+    PRODUCTS_SERVICE_TOKEN, 
+    FILEHANDLER_MIDDLEWARE, 
+    S3_SERVICE_TOKEN, 
+    RUST_COMPRESSOR_TOKEN 
+} from "@src/utils/tokens";
 
 export class ProductsController implements Controller {
 
@@ -16,7 +25,7 @@ export class ProductsController implements Controller {
         @inject(PRODUCTS_SERVICE_TOKEN) private readonly productService: ProductsService,
         @inject(AUTH_MIDDLEWARE) private readonly authMiddleware: AuthMiddleware,
         @inject(FILEHANDLER_MIDDLEWARE) private readonly filehandlerMiddleware: Filehandler,
-        @inject(S3_SERVICE_TOKEN) private readonly s3Service: S3Service,
+        @inject(S3_SERVICE_TOKEN) private readonly s3Service: CloudService,
         @inject(RUST_COMPRESSOR_TOKEN) private readonly compressorService: Compressor
     ) {
         this.qualities = new Array<number>(1080, 720, 480, 360);
@@ -98,13 +107,16 @@ export class ProductsController implements Controller {
         const user = jwt.verify(token, secret) as jwt.JwtPayload;
 
         try {
-            await this.compressAndUpload(req.file);
+            const [img_xl, img_l, img_m, img_s] = await this.compressAndUpload(req.file);
 
-            const { title, img, price, quantity } = req.body;
+            const { title, price, quantity } = req.body;
 
             const data = await this.productService.insert({
                 title, 
-                img, 
+                img_xl, 
+                img_l, 
+                img_m, 
+                img_s,
                 price, 
                 quantity, 
                 author_id: user.id, 
@@ -131,14 +143,13 @@ export class ProductsController implements Controller {
             const compressedImage = await this.compressorService.compress(file, quality);
             compressedImage.originalname = `${quality.toString()}_${compressedImage.originalname}`;
 
-            const location = await this.s3Service.upload(compressedImage);
-            return location;
+            return this.s3Service.upload(compressedImage);
         });
         
         try {
-            const uploadedLocations = await Promise.all(compressAndUploadTasks);
+            const uploadedLocations: Array<string> = await Promise.all(compressAndUploadTasks);
             this.logger.info("Files has been successfully uploaded to s3.");
-            console.log(uploadedLocations);
+            return uploadedLocations;
         } catch (error) {
             this.logger.error(error);
             throw error;

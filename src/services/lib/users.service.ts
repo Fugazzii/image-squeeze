@@ -25,19 +25,9 @@ export class UserService {
                 throw new Error("User already exists");
             }
 
-            const newUser = await this.usersRepository.insert({
-                username, email, pwd
-            });
+            await this.usersRepository.insert({ username, email, pwd });
 
-            console.log(newUser);
-
-            let token = jwt.sign(
-                { id: newUser.id, email: newUser.email }, 
-                this.jwt_secret, 
-                { expiresIn: this.jwt_expires }
-            );
-
-            return token;
+            return true;
         } catch (error) {
             this.logger.error("Error during registering user");
             this.logger.error(error);

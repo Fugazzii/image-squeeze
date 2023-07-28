@@ -3,9 +3,12 @@ BEGIN TRANSACTION;
 CREATE TABLE IF NOT EXISTS products (
     id SERIAL,
     title VARCHAR(256) NOT NULL,
-    img VARCHAR(256),
+    img_xl VARCHAR(256),
+    img_l VARCHAR(256),
+    img_m VARCHAR(256),
+    img_s VARCHAR(256),
     price INTEGER NOT NULL,
-    quantity INTEGER NOT NULL, ;
+    quantity INTEGER NOT NULL,
     author_id INTEGER,
     posted_at TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_products_author FOREIGN KEY (author_id) REFERENCES users(id)

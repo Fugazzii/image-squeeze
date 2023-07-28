@@ -17,3 +17,5 @@ BEGIN
             RAISE;
 END;
 $$;
+
+-- drop procedure if exists delete_user(INTEGER);

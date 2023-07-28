@@ -15,8 +15,16 @@ export class ProductsRepository implements PostgresRepository {
 
     public async insert(product: ProductInterface): Promise<any> {
         try {
-            const { title, img, price, quantity, author_id } = product;
-            const query = `CALL add_product('${title}', '${img}', ${price}, ${quantity}, ${author_id});`;
+            const { title, img_xl, img_l, img_m, img_s, price, quantity, author_id } = product;
+            const query = `CALL add_product(
+                '${title}',
+                '${img_xl}', 
+                '${img_l}', 
+                '${img_m}', 
+                '${img_s}',
+                ${price}, 
+                ${quantity},
+                ${author_id});`;
             await this.client.query(query);
             return product;
         } catch (error) {

@@ -1,17 +1,10 @@
--- Fetch all users
 BEGIN TRANSACTION;
     CREATE OR REPLACE VIEW all_users AS
-    SELECT id, username, email, balance FROM users
-COMMIT;
+    SELECT id, username, email, balance FROM users;
 
--- Get users ids
-BEGIN TRANSACTION;
     CREATE OR REPLACE VIEW all_users_id AS
-    SELECT id FROM users
-COMMIT;
+    SELECT id FROM users;
 
--- Get users count
-BEGIN TRANSACTION;
     CREATE OR REPLACE VIEW users_count AS
-    SELECT COUNT(*) FROM all_users_id
+    SELECT COUNT(*) FROM all_users_id;
 COMMIT;

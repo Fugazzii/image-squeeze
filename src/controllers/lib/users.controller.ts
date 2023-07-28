@@ -46,11 +46,11 @@ export class UserController implements Controller {
         try {
             const { body: { username, email, pwd } } = req as any;
 
-            const newUser = await this.userService.register({username, email, pwd});
+            await this.userService.register({ username, email, pwd });
             
             return res.status(201).json({ 
                 success: true,
-                data: newUser,
+                data: null,
                 message: "New user has been added"
             });
 

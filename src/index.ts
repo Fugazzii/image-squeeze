@@ -3,9 +3,9 @@ import pg from "pg";
 import { config as configDotenv } from "dotenv";
 import { Container, inject } from "inversify";
 
-import { Compressor, Controller, Database, Logger, Server } from "./interfaces";
+import { CloudService, Compressor, Controller, Database, Logger, Server } from "./interfaces";
 import { ProductsController, UserController }from "./controllers";
-import { ProductsService, S3Service, UserService } from "./services";
+import { ProductsService, UserService } from "./services";
 
 import { bootstrap } from "./utils/container/bootstrap";
 
@@ -54,12 +54,12 @@ class App {
         this.container.bind<pg.Client>(PG_CONNECTION).toConstantValue(this.conn);
 
         AWS.config.update({
-            accessKeyId: "AKIARGZ5XCI5IGS2BVPL", // iLB0LuUk3xPnTlKEnUFvPibuykb+ByMfPUI/kCNb
+            accessKeyId: "AKIARGZ5XCI5IGS2BVPL",
             secretAccessKey: "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",
             region: "us-east-1",
         });
 
-        // await this.database.createTables();
+        // await this.database.build();            
 
         this.initializeControllers();
         this.server.listen(3000, () => this.logger.info("Server is listening!"));
@@ -70,7 +70,7 @@ class App {
         const userService = this.container.get<UserService>(USERS_SERVICE_TOKEN);
         const authMiddleware = this.container.get<AuthMiddleware>(AUTH_MIDDLEWARE);
         const filehandlerMiddleware = this.container.get<Filehandler>(FILEHANDLER_MIDDLEWARE);
-        const s3Service = this.container.get<S3Service>(S3_SERVICE_TOKEN);
+        const s3Service = this.container.get<CloudService>(S3_SERVICE_TOKEN);
         const Compressor = this.container.get<Compressor>(RUST_COMPRESSOR_TOKEN);
 
         const userController = new UserController(
