@@ -1,9 +1,9 @@
 import { Container } from "inversify";
 
 import { PinoLogger, ProductsService, RustCompressor, S3Service, UserService } from "@src/services/";
-import { ExpressServer, Postgres } from "@src/config";
+import { ExpressServer, Postgres, RedisCache } from "@src/config";
 import { ProductsRepository, UsersRepository } from "@src/repositories/";
-import { Server, Database, Logger, PostgresRepository, Compressor, CloudService } from "@src/interfaces";
+import { Server, Database, Logger, PostgresRepository, Compressor, CloudService, CacheMemory } from "@src/interfaces";
 
 import { Filehandler, AuthMiddleware } from "@src/middlewares";
 import { ErrorHandler, ResponseHandler } from "../handlers";
@@ -17,6 +17,7 @@ import {
   POSTGRES_TOKEN, 
   PRODUCTS_REPOSITORY, 
   PRODUCTS_SERVICE_TOKEN, 
+  REDIS_TOKEN, 
   RESPONSE_HANDLER, 
   RUST_COMPRESSOR_TOKEN, 
   S3_SERVICE_TOKEN, 
@@ -41,6 +42,11 @@ export async function bootstrap(): Promise<Container> {
       container
         .bind<Database>(POSTGRES_TOKEN)
         .to(Postgres)
+        .inSingletonScope();
+
+      container
+        .bind<CacheMemory>(REDIS_TOKEN)
+        .to(RedisCache)
         .inSingletonScope();
 
       container

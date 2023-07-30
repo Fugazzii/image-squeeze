@@ -1,6 +1,4 @@
-import { Client } from "pg";
-
 export interface Database {
-    connect(): Promise<Client>;
+    connect(): Promise<NonNullable<any>>;
     build(): Promise<void>;
 }

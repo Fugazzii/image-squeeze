@@ -1,5 +1,5 @@
-import { Logger, PostgresRepository, ProductInterface } from "@src/interfaces/";
-import { PG_CONNECTION, PINO_TOKEN } from "@src/utils/tokens";
+import { CacheMemory, Logger, PostgresRepository, ProductInterface } from "@src/interfaces/";
+import { PG_CONNECTION, PINO_TOKEN, REDIS_TOKEN } from "@src/utils/tokens";
 import { injectable, inject } from "inversify";
 import pg from "pg";
 
@@ -7,7 +7,8 @@ import pg from "pg";
 export class ProductsRepository implements PostgresRepository {
   public constructor(
     @inject(PINO_TOKEN) private readonly logger: Logger,
-    @inject(PG_CONNECTION) private readonly client: pg.Client
+    @inject(PG_CONNECTION) private readonly client: pg.Client,
+    @inject(REDIS_TOKEN) private readonly cache: CacheMemory
   ) {}
 
     /* Procedures */
@@ -56,14 +57,34 @@ export class ProductsRepository implements PostgresRepository {
     }
 
     public async findOne(id: number): Promise<any> {
+        
+        /* Retrieve value from cache */
         try {
-            const query = `SELECT * FROM products WHERE id = ${id}`;
-            const result = await this.client.query(query);
-            return result.rows[0];
+            const cachedValue = await this.cache.get(String(id));
+            console.log("cached", cachedValue);
+            if(cachedValue) return cachedValue;
+            
         } catch (error) {
-            this.logger.error("Error while retrieving product");
+            this.logger.error("Error while retreiving product from cache memory");
             throw error;
         }
+        
+        /* Retrieve value from RDBMS and cache it */
+        try {
+            const query = `SELECT * FROM products WHERE id = ${id}`;
+            const db_response = await this.client.query(query);
+
+            const result = db_response.rows[0]; 
+
+            this.cache.add(String(id), result, Number(process.env.CACHED_DATA_EXPIRATION));
+            console.log("added to cache, ", String(id), result);
+
+            return result;
+        } catch (error) {
+            this.logger.error("Error while retrieving product from RDBMS");
+            throw error;
+        }
+
     }
 
     public ping(): string {

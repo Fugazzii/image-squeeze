@@ -1,4 +1,6 @@
-export const POSTGRES_TOKEN = Symbol("POSTGRES_TOKEN"); 
+export const POSTGRES_TOKEN = Symbol("POSTGRES_TOKEN");
+export const REDIS_TOKEN = Symbol("REDIS_TOKEN");
+
 export const PINO_TOKEN = Symbol("PINO_TOKEN"); 
 
 export const PRODUCTS_REPOSITORY = Symbol("PRODUCTS_REPOSITORY");

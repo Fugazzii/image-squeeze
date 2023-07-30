@@ -3,7 +3,7 @@ import pg from "pg";
 import { config as configDotenv } from "dotenv";
 import { Container, inject } from "inversify";
 
-import { Controller, Database, Logger, Server } from "./interfaces";
+import { CacheMemory, Controller, Database, Logger, Server } from "./interfaces";
 import { ProductsController, UserController }from "./controllers";
 import { ProductsService, UserService } from "./services";
 
@@ -18,6 +18,7 @@ import {
     PINO_TOKEN, 
     POSTGRES_TOKEN, 
     PRODUCTS_SERVICE_TOKEN, 
+    REDIS_TOKEN, 
     RESPONSE_HANDLER, 
     USERS_SERVICE_TOKEN 
 } from "./utils/tokens";
@@ -36,6 +37,7 @@ class App {
     public constructor(
         @inject(Container) private readonly container: Container,
         @inject(POSTGRES_TOKEN) private readonly database: Database,
+        @inject(REDIS_TOKEN) private readonly cache: CacheMemory,
         @inject(PINO_TOKEN) private readonly logger: Logger,
         @inject(EXPRESS_SERVER_TOKEN) private readonly server: Server
     ) {
@@ -47,7 +49,9 @@ class App {
     public async init() {
         this.logger.info("App has started");
 
-        this.conn = await this.database.connect();
+        this.conn = await this.database.connect() as pg.Client;
+
+        await this.cache.connect();
 
         this.container.bind<pg.Client>(PG_CONNECTION).toConstantValue(this.conn);
 
@@ -113,9 +117,10 @@ async function main() {
 
     const logger = container.get<Logger>(PINO_TOKEN);
     const database = container.get<Database>(POSTGRES_TOKEN);
+    const cache = container.get<CacheMemory>(REDIS_TOKEN);
     const server = container.get<Server>(EXPRESS_SERVER_TOKEN);
 
-    const app = new App(container, database, logger, server);
+    const app = new App(container, database, cache, logger, server);
     app.init();
 }
 

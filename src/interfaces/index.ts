@@ -7,3 +7,4 @@ export * from "./lib/user.interface";
 export * from "./lib/product.interface";
 export * from "./lib/compressor.interface";
 export * from "./lib/cloud-service.interface";
+export * from "./lib/cache-memory.interface";
