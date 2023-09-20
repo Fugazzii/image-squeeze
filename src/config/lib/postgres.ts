@@ -18,9 +18,20 @@ export class Postgres implements Database {
   public constructor(
     @inject(PINO_TOKEN) private readonly logger: Logger
   ) {
-    const { PG_HOST, PG_PORT, PG_USER, PG_PASSWORD, PG_DB } = process.env;
-    const connectionString = `postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DB}`;
-    this.client = new pg.Client({ connectionString });
+    const { AWS_PG_HOST, AWS_PG_PORT, AWS_PG_USER, AWS_PG_PASSWORD, AWS_PG_DB } = process.env;
+
+    const connectionStringProduction = `postgres://${AWS_PG_USER}:${AWS_PG_PASSWORD}@${AWS_PG_HOST}:${AWS_PG_PORT}/${AWS_PG_DB}`;
+
+    const config = {
+      connectionString: connectionStringProduction,
+      ssl: {
+        rejectUnauthorized: false,
+      }
+    };
+
+    console.log(config);
+
+    this.client = new pg.Client(config);
   }
 
   public async connect(): Promise<pg.Client> {

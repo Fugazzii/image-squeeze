@@ -1,0 +1,38 @@
+.home-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+p.welcome-text {
+  font-size: 20px;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.sign-up-button {
+  padding: 10px 20px;
+  font-size: 18px;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: opacity 1s ease-in-out;
+  margin: 3rem;
+  background: indigo;
+}
+
+.home-container:hover p.welcome-text,
+.home-container:hover a.sign-up-button {
+  opacity: 1;
+}
+
